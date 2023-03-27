@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 # Define the list of cities
-#city_list = [(0, 0), (1, 2), (3, 1), (5, 2), (6, 4), (4, 6), (1, 5), (2, 3), (2, 7), (4, 0), (0, 6)]
+# city_list = [(0, 0), (1, 2), (3, 1), (5, 2), (6, 4), (4, 6), (1, 5), (2, 3), (2, 7), (4, 0), (0, 6)]
 
 # Define the parameters of the genetic algorithm
 POPULATION_SIZE = 50
@@ -90,19 +90,6 @@ def mating_pool(population, elites, non_elites):
     return pool
 
 
-"""
-# function to select the fittest individuals for the next generation (using elitism)
-def elitism(population, fitness_scores, num_elites):
-    elites_idx = np.argsort(fitness_scores)[-num_elites:]
-    elites = [population[i] for i in elites_idx]
-    return elites
-"""
-"""def elitism(population, elite_size):
-    sorted_population = sorted(population, key=lambda tour: tour.distance)
-    return [i for i in range(elite_size)]
-"""
-
-
 # Creates a new tour by performing crossover between two parents.
 def crossover(parent1, parent2):
     child = []
@@ -153,8 +140,8 @@ def evolutionary(cities):
     tourRank = rank_tours(population)
 
     # Initialize the best tour and the best length
-    best_tour = list(population[tourRank[0]])
-    best_length = tour_length(best_tour)
+    bestTour = list(population[tourRank[0]])
+    bestLength = tour_length(bestTour)
 
     # Initialize the generation counter
     generation = 0
@@ -167,16 +154,16 @@ def evolutionary(cities):
 
         tourRank = rank_tours(population)
 
-        best_tour = list(population[tourRank[0]])
-        best_length = tour_length(best_tour)
-        print(f"Generation {generation}: Best tour length - {best_length}")
+        bestTour = list(population[tourRank[0]])
+        bestLength = tour_length(bestTour)
+        print(f"Generation {generation}: Best tour length - {bestLength}")
 
         population = next_generation
 
         # Increment the generation counter
         generation += 1
 
-    return best_tour, best_length
+    return bestTour, bestLength
 
 
 # Run the algorithm and print the results
