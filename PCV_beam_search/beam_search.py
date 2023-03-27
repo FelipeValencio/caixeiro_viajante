@@ -11,7 +11,13 @@ beam_width = 3
 # Define the maximum number of iterations without improvement
 max_iterations = 100
 
-def generate_random_tuples(num_tuples, min_val, max_val):
+# Config cidades
+NUM_CITIES = 200
+MIN_VAL = 0
+MAX_VAL = 100
+
+
+def generate_random_tuples():
     """
     Generate a list of random tuples.
 
@@ -24,8 +30,8 @@ def generate_random_tuples(num_tuples, min_val, max_val):
     - A list of num_tuples tuples, where each tuple contains random values between min_val and max_val.
     """
     tuples = []
-    for i in range(num_tuples):
-        tuple_vals = (random.randint(min_val, max_val), random.randint(min_val, max_val))
+    for i in range(NUM_CITIES):
+        tuple_vals = (random.randint(MIN_VAL, MAX_VAL), random.randint(MIN_VAL, MAX_VAL))
         tuples.append(tuple_vals)
     return tuples
 
@@ -105,6 +111,6 @@ def local_search_beam(cities, beam_width, max_iterations):
     return best_tour, best_length
 
 # Run the algorithm and print the results
-best_tour, best_length = local_search_beam(generate_random_tuples(200, 0, 100), beam_width, max_iterations)
+best_tour, best_length = local_search_beam(generate_random_tuples(), beam_width, max_iterations)
 print('Best tour:', best_tour)
 print('Best length:', best_length)

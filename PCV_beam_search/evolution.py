@@ -11,8 +11,13 @@ ELITE_SIZE = 10
 MUTATION_RATE = 0.1
 GENERATIONS = 5000
 
+# Config cidades
+NUM_CITIES = 200
+MIN_VAL = 0
+MAX_VAL = 100
 
-def generate_random_tuples(num_tuples, min_val, max_val):
+
+def generate_random_tuples():
     """
     Generate a list of random tuples.
 
@@ -25,8 +30,8 @@ def generate_random_tuples(num_tuples, min_val, max_val):
     - A list of num_tuples tuples, where each tuple contains random values between min_val and max_val.
     """
     tuples = []
-    for i in range(num_tuples):
-        tuple_vals = (random.randint(min_val, max_val), random.randint(min_val, max_val))
+    for i in range(NUM_CITIES):
+        tuple_vals = (random.randint(MIN_VAL, MAX_VAL), random.randint(MIN_VAL, MAX_VAL))
         tuples.append(tuple_vals)
     return tuples
 
@@ -167,6 +172,6 @@ def evolutionary(cities):
 
 
 # Run the algorithm and print the results
-best_tour, best_length = evolutionary(generate_random_tuples(200, 0, 100))
+best_tour, best_length = evolutionary(generate_random_tuples())
 print('Best tour:', best_tour)
 print('Best length:', best_length)
