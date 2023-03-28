@@ -12,11 +12,11 @@ beam_width = 2
 max_iterations = 100
 
 # Config cidades
-NUM_CITIES = 10
+NUM_CITIES = 5
 MIN_VAL = 0
 MAX_VAL = 100
 
-DEBUG = False
+DEBUG = True
 
 
 def log(s):
@@ -90,9 +90,13 @@ def local_search_beam(cities, beam_width, max_iterations):
     # Generate an initial tour
     current_tour = initial_tour(cities)
 
+    log("initial_tour: " + str(current_tour))
+
     # Initialize the best tour and the best length
     best_tour = list(current_tour)
     best_length = tour_length(best_tour)
+
+    log("initial_length: " + str(best_length))
 
     # Initialize the iteration counter
     iteration = 0
@@ -103,11 +107,17 @@ def local_search_beam(cities, beam_width, max_iterations):
         # Generate all possible neighboring tours
         neighbors = neighboring_tours(current_tour)
 
-        # Select the best k neighbors
+        log("neighbors: " + str(neighbors))
+
+        # Select the best k neighbors, k = beam_width
         k_best_neighbors = select_best_tours(neighbors, beam_width)
+
+        log("k_best_neighbors: " + str(k_best_neighbors))
 
         # Select the best tour among the k best neighbors
         current_tour = min(k_best_neighbors, key=tour_length)
+
+        log("current_tour: " + str(current_tour))
 
         # Update the best tour and the best length
         current_length = tour_length(current_tour)
