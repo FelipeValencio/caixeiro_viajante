@@ -1,20 +1,26 @@
 import random
-import numpy as np
 import math
 
 # Define the list of cities
 # city_list = [(0, 0), (1, 2), (3, 1), (5, 2), (6, 4), (4, 6), (1, 5), (2, 3), (2, 7), (4, 0), (0, 6)]
 
 # Define the parameters of the genetic algorithm
-POPULATION_SIZE = 50
-ELITE_SIZE = 10
+POPULATION_SIZE = 100
+ELITE_SIZE = 0.2
 MUTATION_RATE = 0.1
-GENERATIONS = 5000
+GENERATIONS = 1000
 
 # Config cidades
-NUM_CITIES = 200
+NUM_CITIES = 10
 MIN_VAL = 0
 MAX_VAL = 100
+
+DEBUG = False
+
+
+def log(s):
+    if DEBUG:
+        print(s)
 
 
 def generate_random_tuples():
@@ -31,7 +37,10 @@ def generate_random_tuples():
     """
     tuples = []
     for i in range(NUM_CITIES):
-        tuple_vals = (random.randint(MIN_VAL, MAX_VAL), random.randint(MIN_VAL, MAX_VAL))
+        while True:
+            tuple_vals = (random.randint(MIN_VAL, MAX_VAL), random.randint(MIN_VAL, MAX_VAL))
+            if tuple_vals not in tuples:
+                break
         tuples.append(tuple_vals)
     return tuples
 
@@ -46,7 +55,11 @@ def create_tour(cities):
 def create_population(cities, population_size):
     population = []
     for i in range(population_size):
-        population.append(create_tour(cities))
+        while True:
+            tour = create_tour(cities)
+            if tour not in population:
+                break
+        population.append(tour)
     return population
 
 
@@ -59,27 +72,32 @@ def distance(city1, city2):
 def tour_length(tour):
     length = 0
     for i in range(len(tour)):
-        length += distance(tour[i], tour[(i + 1) % len(
-            tour)])  # Sempre pega a proxima cidade da lista (o % eh para voltar ao comeco casa i+1 > len(tour))
+        # Sempre pega a proxima cidade da lista (o % eh para voltar ao comeco casa i+1 > len(tour))
+        length += distance(tour[i], tour[(i + 1) % len(tour)])
     return length
 
 
 # Selects the top elite_size tours as parents for mating.
 def selection(population, elite_size):
     ranked_tours = rank_tours(population)
-    elites = ranked_tours[:elite_size]
-    non_elites = ranked_tours[elite_size:]
+    elites = ranked_tours[:int(POPULATION_SIZE * elite_size)]
+    non_elites = ranked_tours[int(POPULATION_SIZE * elite_size):]
     return elites, non_elites
 
 
 # Ranks the tours in the population by their fitness (the shortest total distance).
 def rank_tours(population):
+    fitness_scores = getFitness(population)
+    ranked_tours = sorted(fitness_scores.items(), key=lambda x: x[1], reverse=True)
+    return [x[0] for x in ranked_tours]
+
+
+def getFitness(population):
     fitness_scores = {}
     for i in range(len(population)):
         tour = population[i]
         fitness_scores[i] = 1 / tour_length(tour)
-    ranked_tours = sorted(fitness_scores.items(), key=lambda x: x[1], reverse=True)
-    return [x[0] for x in ranked_tours]
+    return fitness_scores
 
 
 # Creates a mating pool of offspring for the next generation.
@@ -88,35 +106,29 @@ def mating_pool(population, elites, non_elites):
     for i in elites:
         pool.append(population[i])
     for i in range(len(non_elites)):
-        parent1 = random.choice(elites)
-        parent2 = random.choice(non_elites)
-        child = crossover(population[parent1], population[parent2])
+        parentElite = random.choice(elites)
+        parentNonelite = random.choice(non_elites)
+        child = crossover(population[parentElite], population[parentNonelite])
         pool.append(child)
     return pool
 
 
 # Creates a new tour by performing crossover between two parents.
-def crossover(parent1, parent2):
+def crossover(parent_elite, parent_nonelite):
     child = []
-    gene_a = int(random.random() * len(parent1))
-    gene_b = int(random.random() * len(parent2))
+    # quantos genes (tuplas) serão usadas do parent elite ///
+    gene_a = int(random.random() * len(parent_elite))
+    gene_b = int(random.random() * len(parent_nonelite))
     start_gene = min(gene_a, gene_b)
     end_gene = max(gene_a, gene_b)
     for i in range(start_gene, end_gene):
-        child.append(parent1[i])
-    for i in range(len(parent2)):
-        if parent2[i] not in child:
-            child.append(parent2[i])
+        child.append(parent_elite[i])
+    # ///
+    # Os genes restantes são completos pelo pai não elite
+    for i in range(len(parent_nonelite)):
+        if parent_nonelite[i] not in child:
+            child.append(parent_nonelite[i])
     return child
-
-
-# function to select parents from the population (using roulette wheel selection)
-def roulette_wheel_selection(population, fitness_scores):
-    max_score = sum(fitness_scores)
-    selection_probs = [score / max_score for score in fitness_scores]
-    parents_idx = np.random.choice(len(population), size=2, p=selection_probs)
-    parents = [population[i] for i in parents_idx]
-    return parents
 
 
 # function to apply mutation to the entire population
@@ -136,42 +148,59 @@ def mutate(tour):
 
 def evolutionary(cities):
     # Generate an initial tour
-    population = create_population(cities, POPULATION_SIZE)
-    # print("population: "+ str(population))
+    global bestTour, bestLength, bestTourOverall, bestLengthOverall
 
-    # print("rank: " + str(rank_tours(population)))
-    # print("fitness: " + str(getFitnessScores(population)))
+    population = create_population(cities, POPULATION_SIZE)
 
     tourRank = rank_tours(population)
-
-    # Initialize the best tour and the best length
     bestTour = list(population[tourRank[0]])
     bestLength = tour_length(bestTour)
+
+    bestTourOverall = bestTour
+    bestLengthOverall = bestLength
 
     # Initialize the generation counter
     generation = 0
 
     # Start the main loop
     while generation < GENERATIONS:
+        log(f"Generation {generation + 1}")
+
+        log("population: " + str(population))
+
+        log("fitness: " + str(getFitness(population)))
+
         elites, non_elites = selection(population, ELITE_SIZE)
+
+        log("parents elite: " + str(elites))
+        log("parents non_elites: " + str(non_elites))
+
         pool = mating_pool(population, elites, non_elites)
+
+        log("next gen sem mutação: " + str(pool))
+
         next_generation = mutate_population(pool, MUTATION_RATE)
 
-        tourRank = rank_tours(population)
+        log("next gen: " + str(next_generation))
 
+        tourRank = rank_tours(population)
         bestTour = list(population[tourRank[0]])
         bestLength = tour_length(bestTour)
-        print(f"Generation {generation}: Best tour length - {bestLength}")
+        print(f"Generation {generation + 1}: Best tour length - {bestLength}")
+
+        if bestLength < bestLengthOverall:
+            bestTourOverall = bestTour
+            bestLengthOverall = bestLength
 
         population = next_generation
 
         # Increment the generation counter
         generation += 1
 
-    return bestTour, bestLength
+    return bestTourOverall, bestLengthOverall
 
 
 # Run the algorithm and print the results
 best_tour, best_length = evolutionary(generate_random_tuples())
-print('Best tour:', best_tour)
-print('Best length:', best_length)
+print('Best tour: ' + str(best_tour))
+print('Best length:' + str(best_length))
