@@ -6,18 +6,18 @@ import numpy as np
 # city_list = [(0, 0), (1, 2), (3, 1), (5, 2), (6, 4), (4, 6), (1, 5), (2, 3), (2, 7), (4, 0), (0, 6)]
 
 # Define the parameters of the genetic algorithm
-POPULATION_SIZE = 10
+POPULATION_SIZE = 100
 ELITE_SIZE = POPULATION_SIZE * 0.2
 MUTATION_RATE = 0.1
 GENERATIONS = 1000
 
 # Config cidades
-NUM_CITIES = 5
+NUM_CITIES = 100
 NUM_ARESTAS = int((NUM_CITIES * (NUM_CITIES - 1)) / 2)
 MIN_VAL = 0
 MAX_VAL = 100
 
-DEBUG = True
+DEBUG = False
 
 lista_arestas = []
 
@@ -54,8 +54,8 @@ def generate_random_tuples():
 def generate_random_arestas():
     for i in range(1, NUM_ARESTAS):
         while True:
-            aresta = (
-            random.randint(0, NUM_CITIES - 1), random.choice([x for x in range(0, NUM_CITIES - 1) if x not in [i]]))
+            aresta = (random.randint(0, NUM_CITIES - 1),
+                      random.choice([x for x in range(0, NUM_CITIES - 1) if x not in [i]]))
             if aresta not in lista_arestas and aresta[::-1] not in lista_arestas and aresta[0] != aresta[1]:
                 break
         lista_arestas.append(aresta)
