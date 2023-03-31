@@ -1,6 +1,7 @@
 import random
 import math
 import numpy as np
+import time
 
 # Define the list of cities
 # city_list = [(0, 0), (1, 2), (3, 1), (5, 2), (6, 4), (4, 6), (1, 5), (2, 3), (2, 7), (4, 0), (0, 6)]
@@ -12,7 +13,7 @@ MUTATION_RATE = 0.1
 GENERATIONS = 1000
 
 # Config cidades
-NUM_CITIES = 1000
+NUM_CITIES = 10000
 MIN_VAL = 0
 MAX_VAL = 100
 
@@ -24,40 +25,38 @@ def log(s):
         print(s)
 
 
+# Generate a list of random tuples.
 def generate_random_tuples():
-    """
-    Generate a list of random tuples.
-
-    Args:
-    - num_tuples (int): the number of tuples to generate
-    - min_val (int): the minimum value for each element in the tuple
-    - max_val (int): the maximum value for each element in the tuple
-
-    Returns:
-    - A list of num_tuples tuples, where each tuple contains random values between min_val and max_val.
-    """
-    tuples = []
+    global cities
+    cities = []
     for i in range(NUM_CITIES):
         while True:
             tuple_vals = (random.randint(MIN_VAL, MAX_VAL), random.randint(MIN_VAL, MAX_VAL))
-            if tuple_vals not in tuples:
+            if tuple_vals not in cities:
                 break
-        tuples.append(tuple_vals)
-    return tuples
+        cities.append(tuple_vals)
+
+
+def generate_aresta_matriz():
+    global distanciaArestas
+    distanciaArestas = [[0 for x in range(NUM_CITIES)] for y in range(NUM_CITIES)]
+    for i in range(NUM_CITIES):
+        for j in range(0, NUM_CITIES):
+            distanciaArestas[i][j] = getDistance(cities[i], cities[j % len(cities)])
 
 
 # Creates a random tour through all the cities.
-def create_tour(cities):
+def create_tour():
     tour = random.sample(cities, len(cities))
     return tour
 
 
 # Creates a population of tours.
-def create_population(cities, population_size):
+def create_population(population_size):
     population = []
     for i in range(population_size):
         while True:
-            tour = create_tour(cities)
+            tour = create_tour()
             if tour not in population:
                 break
         population.append(tour)
@@ -65,7 +64,7 @@ def create_population(cities, population_size):
 
 
 # Compute the distance between two cities
-def distance(city1, city2):
+def getDistance(city1, city2):
     return math.sqrt((city1[0] - city2[0]) ** 2 + (city1[1] - city2[1]) ** 2)
 
 
@@ -73,8 +72,11 @@ def distance(city1, city2):
 def tour_length(tour):
     length = 0
     for i in range(len(tour)):
+        # consultar as distancias das arestas em uma matriz piorou a performance em mais ou menos 7x para 1000 cidades
+        # length += distanciaArestas[cities.index(tour[i])][cities.index(tour[(i + 1) % len(tour)])]
+
         # Sempre pega a proxima cidade da lista (o % eh para voltar ao comeco casa i+1 > len(tour))
-        length += distance(tour[i], tour[(i + 1) % len(tour)])
+        length += getDistance(tour[i], tour[(i + 1) % len(tour)])
     return length
 
 
@@ -166,11 +168,11 @@ def mutate(tour):
     return tour
 
 
-def evolutionary(cities):
+def evolutionary():
     # Generate an initial tour
     global bestTour, bestLength, bestTourOverall, bestLengthOverall
 
-    population = create_population(cities, POPULATION_SIZE)
+    population = create_population(POPULATION_SIZE)
 
     tourRank = rank_tours(population)
     bestTour = list(population[tourRank[0]])
@@ -184,6 +186,7 @@ def evolutionary(cities):
 
     # Start the main loop
     while generation < GENERATIONS:
+        start = time.time()
         log(f"Generation {generation + 1}")
 
         log("population: " + str(population))
@@ -214,6 +217,8 @@ def evolutionary(cities):
 
         population = next_generation
 
+        end = time.time()
+        print(f"tempo Generation {generation + 1}: " + str(end - start))
         # Increment the generation counter
         generation += 1
 
@@ -221,6 +226,16 @@ def evolutionary(cities):
 
 
 # Run the algorithm and print the results
-best_tour, best_length = evolutionary(generate_random_tuples())
+start = time.time()
+generate_random_tuples()
+end = time.time()
+print("tempo generate_random_tuples:" + str(end - start))
+
+# start = time.time()
+# generate_aresta_matriz()
+# end = time.time()
+# print("tempo generate_aresta_matriz:" + str(end - start))
+
+best_tour, best_length = evolutionary()
 print('Best tour: ' + str(best_tour))
 print('Best length:' + str(best_length))
