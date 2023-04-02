@@ -6,13 +6,13 @@ import time
 # cities = [(0, 0), (1, 2), (3, 1), (5, 2), (6, 4), (4, 6), (1, 5), (2, 3), (2, 7), (4, 0), (0, 6)]
 
 # Define the beam width
-beam_width = 2
+beam_width = 3
 
 # Define the maximum number of iterations without improvement
 max_iterations = 100
 
 # Config cidades
-NUM_CITIES = 5
+NUM_CITIES = 10
 MIN_VAL = 0
 MAX_VAL = 100
 
@@ -79,6 +79,19 @@ def neighboring_tours(tour):
     return neighbors
 
 
+def neighbors_caminhosv2(beam):
+    neighbors = []
+    for tour, score in beam:
+        for i in range(len(tour)):
+            for j in range(i + 1, len(tour)):
+                neighbor = list(tour)
+                neighbor[i], neighbor[j] = neighbor[j], neighbor[i]
+                neighbors.append(neighbor)
+    # sort neighbors by score and keep only the top k
+    neighbors = sorted([(neighbor, tour_length(neighbor)) for neighbor in neighbors], key=lambda x: x[1])[:beam_width]
+    return neighbors
+
+
 # Select the k best tours
 def select_best_tours(tours, k):
     tours.sort(key=tour_length)
@@ -105,7 +118,7 @@ def local_search_beam(cities, beam_width, max_iterations):
     while iteration < max_iterations:
         start = time.time()
         # Generate all possible neighboring tours
-        neighbors = neighboring_tours(current_tour)
+        neighbors = neighbors_caminhosv2(current_tour)
 
         log("neighbors: " + str(neighbors))
 

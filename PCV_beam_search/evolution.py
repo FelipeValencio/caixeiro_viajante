@@ -7,17 +7,17 @@ import time
 # city_list = [(0, 0), (1, 2), (3, 1), (5, 2), (6, 4), (4, 6), (1, 5), (2, 3), (2, 7), (4, 0), (0, 6)]
 
 # Define the parameters of the genetic algorithm
-POPULATION_SIZE = 100
+POPULATION_SIZE = 1000
 ELITE_SIZE = POPULATION_SIZE * 0.2
 MUTATION_RATE = 0.1
-GENERATIONS = 1000
+GENERATIONS = 100
 
 # Config cidades
-NUM_CITIES = 10000
+NUM_CITIES = 4000
 MIN_VAL = 0
 MAX_VAL = 100
 
-DEBUG = False
+DEBUG = True
 
 
 def log(s):
@@ -189,22 +189,28 @@ def evolutionary():
         start = time.time()
         log(f"Generation {generation + 1}")
 
-        log("population: " + str(population))
+        # log("population: " + str(population))
+        log("population: ")
 
-        log("fitness: " + str(getFitness(population)))
+       # log("fitness: " + str(getFitness(population)))
+        log("fitness: ")
 
         elites, non_elites = selection(population, ELITE_SIZE)
 
-        log("parents elite: " + str(elites))
-        log("parents non_elites: " + str(non_elites))
+        #log("parents elite: " + str(elites))
+        log("parents elite")
+        #log("parents non_elites: " + str(non_elites))
+        log("parents non_elites: ")
 
         pool = mating_pool(population, elites, non_elites)
 
-        log("next gen sem mutação: " + str(pool))
+        # log("next gen sem mutação: " + str(pool))
+        log("next gen sem mutação: ")
 
         next_generation = mutate_population(pool, MUTATION_RATE)
 
-        log("next gen: " + str(next_generation))
+        #log("next gen: " + str(next_generation))
+        log("next gen: ")
 
         tourRank = rank_tours(population)
         bestTour = list(population[tourRank[0]])
