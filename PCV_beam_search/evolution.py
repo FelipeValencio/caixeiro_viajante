@@ -13,7 +13,7 @@ MUTATION_RATE = 0.1
 GENERATIONS = 100
 
 # Config cidades
-NUM_CITIES = 4000
+NUM_CITIES = 100
 MIN_VAL = 0
 MAX_VAL = 100
 
@@ -45,21 +45,21 @@ def generate_aresta_matriz():
             distanciaArestas[i][j] = getDistance(cities[i], cities[j % len(cities)])
 
 
-# Creates a random tour through all the cities.
-def create_tour():
-    tour = random.sample(cities, len(cities))
-    return tour
+# Creates a random caminho through all the cities.
+def create_caminho():
+    caminho = random.sample(cities, len(cities))
+    return caminho
 
 
-# Creates a population of tours.
+# Creates a population of caminhos.
 def create_population(population_size):
     population = []
     for i in range(population_size):
         while True:
-            tour = create_tour()
-            if tour not in population:
+            caminho = create_caminho()
+            if caminho not in population:
                 break
-        population.append(tour)
+        population.append(caminho)
     return population
 
 
@@ -68,27 +68,27 @@ def getDistance(city1, city2):
     return math.sqrt((city1[0] - city2[0]) ** 2 + (city1[1] - city2[1]) ** 2)
 
 
-# Compute the length of a tour
-def tour_length(tour):
+# Compute the length of a caminho
+def caminho_length(caminho):
     length = 0
-    for i in range(len(tour)):
+    for i in range(len(caminho)):
         # consultar as distancias das arestas em uma matriz piorou a performance em mais ou menos 7x para 1000 cidades
-        # length += distanciaArestas[cities.index(tour[i])][cities.index(tour[(i + 1) % len(tour)])]
+        # length += distanciaArestas[cities.index(caminho[i])][cities.index(caminho[(i + 1) % len(caminho)])]
 
-        # Sempre pega a proxima cidade da lista (o % eh para voltar ao comeco casa i+1 > len(tour))
-        length += getDistance(tour[i], tour[(i + 1) % len(tour)])
+        # Sempre pega a proxima cidade da lista (o % eh para voltar ao comeco casa i+1 > len(caminho))
+        length += getDistance(caminho[i], caminho[(i + 1) % len(caminho)])
     return length
 
 
-# Selects the top elite_size tours as parents for mating.
+# Selects the top elite_size caminhos as parents for mating.
 def selection(population, elite_size):
-    ranked_tours = rank_tours(population)
-    elites = ranked_tours[:int(elite_size)]
+    ranked_caminhos = rank_caminhos(population)
+    elites = ranked_caminhos[:int(elite_size)]
     non_elites = roulette_wheel_selection(population, elite_size)
     return elites, non_elites
 
 
-# Selects non-elite tours from the population using roulette wheel selection.
+# Selects non-elite caminhos from the population using roulette wheel selection.
 def roulette_wheel_selection(population, elite_size):
     fitness_scores = getFitness(population)
     total_fitness = 0
@@ -107,18 +107,18 @@ def roulette_wheel_selection(population, elite_size):
     return non_elites
 
 
-# Ranks the tours in the population by their fitness (the shortest total distance).
-def rank_tours(population):
+# Ranks the caminhos in the population by their fitness (the shortest total distance).
+def rank_caminhos(population):
     fitness_scores = getFitness(population)
-    ranked_tours = sorted(fitness_scores.items(), key=lambda x: x[1], reverse=True)
-    return [x[0] for x in ranked_tours]
+    ranked_caminhos = sorted(fitness_scores.items(), key=lambda x: x[1], reverse=True)
+    return [x[0] for x in ranked_caminhos]
 
 
 def getFitness(population):
     fitness_scores = {}
     for i in range(len(population)):
-        tour = population[i]
-        fitness_scores[i] = 1 / tour_length(tour)
+        caminho = population[i]
+        fitness_scores[i] = 1 / caminho_length(caminho)
     return fitness_scores
 
 
@@ -135,7 +135,7 @@ def mating_pool(population, elites, non_elites):
     return pool
 
 
-# Creates a new tour by performing crossover between two parents.
+# Creates a new caminho by performing crossover between two parents.
 def crossover(parent_elite, parent_nonelite):
     child = []
     # quantos genes (tuplas) serão usadas do parent elite ///
@@ -161,24 +161,24 @@ def mutate_population(population, mutation_rate):
     return population
 
 
-# function to mutate a tour by swapping two cities
-def mutate(tour):
-    i, j = random.sample(range(len(tour)), 2)
-    tour[i], tour[j] = tour[j], tour[i]
-    return tour
+# function to mutate a caminho by swapping two cities
+def mutate(caminho):
+    i, j = random.sample(range(len(caminho)), 2)
+    caminho[i], caminho[j] = caminho[j], caminho[i]
+    return caminho
 
 
 def evolutionary():
-    # Generate an initial tour
-    global bestTour, bestLength, bestTourOverall, bestLengthOverall
+    # Generate an initial caminho
+    global bestcaminho, bestLength, bestcaminhoOverall, bestLengthOverall
 
     population = create_population(POPULATION_SIZE)
 
-    tourRank = rank_tours(population)
-    bestTour = list(population[tourRank[0]])
-    bestLength = tour_length(bestTour)
+    caminhoRank = rank_caminhos(population)
+    bestcaminho = list(population[caminhoRank[0]])
+    bestLength = caminho_length(bestcaminho)
 
-    bestTourOverall = bestTour
+    bestcaminhoOverall = bestcaminho
     bestLengthOverall = bestLength
 
     # Initialize the generation counter
@@ -212,13 +212,13 @@ def evolutionary():
         #log("next gen: " + str(next_generation))
         log("next gen: ")
 
-        tourRank = rank_tours(population)
-        bestTour = list(population[tourRank[0]])
-        bestLength = tour_length(bestTour)
-        print(f"Generation {generation + 1}: Best tour length - {bestLength}")
+        caminhoRank = rank_caminhos(population)
+        bestcaminho = list(population[caminhoRank[0]])
+        bestLength = caminho_length(bestcaminho)
+        print(f"Generation {generation + 1}: Best caminho length - {bestLength}")
 
         if bestLength < bestLengthOverall:
-            bestTourOverall = bestTour
+            bestcaminhoOverall = bestcaminho
             bestLengthOverall = bestLength
 
         population = next_generation
@@ -228,7 +228,7 @@ def evolutionary():
         # Increment the generation counter
         generation += 1
 
-    return bestTourOverall, bestLengthOverall
+    return bestcaminhoOverall, bestLengthOverall
 
 
 # Run the algorithm and print the results
@@ -242,6 +242,6 @@ print("tempo generate_random_tuples:" + str(end - start))
 # end = time.time()
 # print("tempo generate_aresta_matriz:" + str(end - start))
 
-best_tour, best_length = evolutionary()
-print('Best tour: ' + str(best_tour))
-print('Best length:' + str(best_length))
+best_caminho, best_length = evolutionary()
+print('melhor caminho: ' + str(best_caminho))
+print('melhor distância:' + str(best_length))

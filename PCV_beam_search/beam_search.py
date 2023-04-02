@@ -2,17 +2,14 @@ import random
 import math
 import time
 
-# Define the cities as a list of (x, y) coordinates
-# cities = [(0, 0), (1, 2), (3, 1), (5, 2), (6, 4), (4, 6), (1, 5), (2, 3), (2, 7), (4, 0), (0, 6)]
-
-# Define the beam width
+# Define a largura do feixe
 beam_width = 3
 
-# Define the maximum number of iterations without improvement
+# Defina o número máximo de iterações
 max_iterations = 100
 
 # Config cidades
-NUM_CITIES = 10
+NUM_CITIES = 100
 MIN_VAL = 0
 MAX_VAL = 100
 
@@ -24,18 +21,8 @@ def log(s):
         print(s)
 
 
+# Gera uma lista de tuplas aleatórias.
 def generate_random_tuples():
-    """
-    Generate a list of random tuples.
-
-    Args:
-    - num_tuples (int): the number of tuples to generate
-    - min_val (int): the minimum value for each element in the tuple
-    - max_val (int): the maximum value for each element in the tuple
-
-    Returns:
-    - A list of num_tuples tuples, where each tuple contains random values between min_val and max_val.
-    """
     tuples = []
     for i in range(NUM_CITIES):
         while True:
@@ -46,35 +33,41 @@ def generate_random_tuples():
     return tuples
 
 
-# Compute the distance between two cities
+# Calcula a distância entre duas cidades, com distancia euclidiana
 def distance(city1, city2):
     return math.sqrt((city1[0] - city2[0]) ** 2 + (city1[1] - city2[1]) ** 2)
 
 
-# Compute the length of a tour
-def tour_length(tour):
+# Calcular a distancia de um caminho
+def caminho_length(caminho):
     length = 0
-    for i in range(len(tour)):
-        # Sempre pega a proxima cidade da lista (o % eh para voltar ao comeco casa i+1 > len(tour))
-        length += distance(tour[i], tour[(i + 1) % len(tour)])
+    for i in range(len(caminho)):
+        # Sempre pega a proxima cidade da lista (o % eh para voltar ao comeco casa i+1 > len(caminho))
+        length += distance(caminho[i], caminho[(i + 1) % len(caminho)])
     return length
 
 
-# Generate an initial tour
-def initial_tour(cities):
-    tour = list(cities)
-    random.shuffle(tour)
-    return tour
+# Gera um caminho inicial
+def initial_caminho(cities):
+    caminhos = []
+    for i in range(beam_width):
+        caminho = list(cities)
+        random.shuffle(caminho)
+        if caminho not in caminhos:
+            caminhos.append(caminho)
+    return caminhos
 
 
-# Generate all possible neighboring tours
-def neighboring_tours(tour):
-    neighbors = []
-    for i in range(len(tour)):
-        for j in range(i + 1, len(tour)):
-            neighbor = list(tour)
-            neighbor[i], neighbor[j] = neighbor[j], neighbor[i]
-            neighbors.append(neighbor)
+# Gera todos os vizinhos possiveis a partir dos k_best_neighbors
+def neighbors_caminhos(k_best_neighbors):
+    neighbors = k_best_neighbors.copy()
+    for caminho in k_best_neighbors:
+        for i in range(len(caminho)):
+            for j in range(i + 1, len(caminho)):
+                neighbor = list(caminho)
+                neighbor[i], neighbor[j] = neighbor[j], neighbor[i]
+                if neighbor not in neighbors:
+                    neighbors.append(neighbor)
 
     return neighbors
 
@@ -88,70 +81,61 @@ def neighbors_caminhosv2(beam):
                 neighbor[i], neighbor[j] = neighbor[j], neighbor[i]
                 neighbors.append(neighbor)
     # sort neighbors by score and keep only the top k
-    neighbors = sorted([(neighbor, tour_length(neighbor)) for neighbor in neighbors], key=lambda x: x[1])[:beam_width]
+    neighbors = sorted([(neighbor, caminho_length(neighbor)) for neighbor in neighbors], key=lambda x: x[1])[:beam_width]
     return neighbors
 
 
 # Select the k best tours
-def select_best_tours(tours, k):
-    tours.sort(key=tour_length)
-    return tours[:k]
+def select_best_caminhos(caminhos, k):
+    caminhos.sort(key=caminho_length)
+    return caminhos[:k]
 
 
-# Local search beam algorithm
-def local_search_beam(cities, beam_width, max_iterations):
-    # Generate an initial tour
-    current_tour = initial_tour(cities)
+# main loop
+def local_search_beam(cities):
+    global best_length, best_caminho, beam_width, max_iterations
+    # Gera um caminho inicial
+    k_best_neighbors = initial_caminho(cities)
 
-    log("initial_tour: " + str(current_tour))
+    # log("initial_caminho: " + str(k_best_neighbors))
 
-    # Initialize the best tour and the best length
-    best_tour = list(current_tour)
-    best_length = tour_length(best_tour)
+    current_caminho = min(k_best_neighbors, key=caminho_length)
+    best_length = caminho_length(current_caminho)
 
-    log("initial_length: " + str(best_length))
-
-    # Initialize the iteration counter
     iteration = 0
 
-    # Start the main loop
     while iteration < max_iterations:
         start = time.time()
-        # Generate all possible neighboring tours
-        neighbors = neighbors_caminhosv2(current_tour)
+        neighbors = neighbors_caminhos(k_best_neighbors)
 
-        log("neighbors: " + str(neighbors))
+        log("neighbors len: " + str(len(neighbors)))
 
-        # Select the best k neighbors, k = beam_width
-        k_best_neighbors = select_best_tours(neighbors, beam_width)
+        # Seleciona os k melhores vizinhos, k = beam_width
+        k_best_neighbors = select_best_caminhos(neighbors, beam_width)
 
-        log("k_best_neighbors: " + str(k_best_neighbors))
+        log("k_best_neighbors len: " + str(len(k_best_neighbors)))
 
-        # Select the best tour among the k best neighbors
-        current_tour = min(k_best_neighbors, key=tour_length)
+        # Seleciona o melhor caminho entre os k melhores vizinhos
+        current_caminho = min(k_best_neighbors, key=caminho_length)
 
-        log("current_tour: " + str(current_tour))
-
-        # Update the best tour and the best length
-        current_length = tour_length(current_tour)
+        # Atualiza o melhor caminho e melhor distancia
+        current_length = caminho_length(current_caminho)
         if current_length < best_length:
-            best_tour = list(current_tour)
+            best_caminho = list(current_caminho)
             best_length = current_length
-            iteration -= 1
 
-        print(f"Iteration {iteration + 1}: Best tour length - {best_length}")
+        print(f"Iteration {iteration + 1}: Best caminho length - {best_length}")
 
-        # Aumenta o contador quando o score não melhora
         iteration += 1
 
         end = time.time()
 
-        log("tempo:" + str(end - start))
+        print("tempo: " + str(end - start))
 
-    return best_tour, best_length
+    return best_caminho, best_length
 
 
-# Run the algorithm and print the results
-best_tour, best_length = local_search_beam(generate_random_tuples(), beam_width, max_iterations)
-print('Best tour:', best_tour)
+# Executa o algoritmo e imprime os resultados
+best_caminho, best_length = local_search_beam(generate_random_tuples())
+print('Best caminho:', best_caminho)
 print('Best length:', best_length)
