@@ -19,6 +19,8 @@ MAX_VAL = 100
 
 DEBUG = True
 
+cities = []
+
 
 def log(s):
     if DEBUG:
@@ -37,12 +39,12 @@ def generate_random_tuples():
         cities.append(tuple_vals)
 
 
-def generate_aresta_matriz():
-    global distanciaArestas
-    distanciaArestas = [[0 for x in range(NUM_CITIES)] for y in range(NUM_CITIES)]
-    for i in range(NUM_CITIES):
-        for j in range(0, NUM_CITIES):
-            distanciaArestas[i][j] = getDistance(cities[i], cities[j % len(cities)])
+# def generate_aresta_matriz():
+#    global distanciaArestas
+#    distanciaArestas = [[0 for x in range(NUM_CITIES)] for y in range(NUM_CITIES)]
+#    for i in range(NUM_CITIES):
+#        for j in range(0, NUM_CITIES):
+#            distanciaArestas[i][j] = getDistance(cities[i], cities[j % len(cities)])
 
 
 # Creates a random caminho through all the cities.
@@ -186,20 +188,22 @@ def evolutionary():
 
     # Start the main loop
     while generation < GENERATIONS:
+
         start = time.time()
+
         log(f"Generation {generation + 1}")
 
         # log("population: " + str(population))
         log("population: ")
 
-       # log("fitness: " + str(getFitness(population)))
+        # log("fitness: " + str(getFitness(population)))
         log("fitness: ")
 
         elites, non_elites = selection(population, ELITE_SIZE)
 
-        #log("parents elite: " + str(elites))
+        # log("parents elite: " + str(elites))
         log("parents elite")
-        #log("parents non_elites: " + str(non_elites))
+        # log("parents non_elites: " + str(non_elites))
         log("parents non_elites: ")
 
         pool = mating_pool(population, elites, non_elites)
@@ -209,13 +213,14 @@ def evolutionary():
 
         next_generation = mutate_population(pool, MUTATION_RATE)
 
-        #log("next gen: " + str(next_generation))
+        # log("next gen: " + str(next_generation))
         log("next gen: ")
 
         caminhoRank = rank_caminhos(population)
         bestcaminho = list(population[caminhoRank[0]])
         bestLength = caminho_length(bestcaminho)
-        print(f"Generation {generation + 1}: Best caminho length - {bestLength}")
+        print(f"Generation {generation + 1}: Best caminho length - {bestLength} "
+              f"Best Fitness - {1 / caminho_length(bestcaminho)}")
 
         if bestLength < bestLengthOverall:
             bestcaminhoOverall = bestcaminho

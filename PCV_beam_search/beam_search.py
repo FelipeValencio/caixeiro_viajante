@@ -66,7 +66,8 @@ def neighbors_caminhos(k_best_neighbors):
             for j in range(i + 1, len(tour)):
                 neighbor = list(tour)
                 neighbor[i], neighbor[j] = neighbor[j], neighbor[i]
-                neighbors.append(neighbor)
+                if neighbor not in neighbors:
+                    neighbors.append(neighbor)
     # sort neighbors by score and keep only the top k
     neighbors = select_best_caminhos(neighbors, beam_width)
     return neighbors
@@ -94,17 +95,13 @@ def local_search_beam(cities):
     while iteration < max_iterations:
         start = time.time()
 
-        neighbors = neighbors_caminhos(k_best_neighbors)
-
-        log("neighbors len: " + str(len(neighbors)))
-
-        # Seleciona os k melhores vizinhos, k = beam_width
-        k_best_neighbors = select_best_caminhos(neighbors, beam_width)
+        # Gera todos os vizinhos possiveis a partir dos k_best_neighbors e filtra os K melhores, k = beam_width
+        k_best_neighbors = neighbors_caminhos(k_best_neighbors)
 
         log("k_best_neighbors len: " + str(len(k_best_neighbors)))
 
         # Seleciona o melhor caminho entre os k melhores vizinhos
-        current_caminho = min(k_best_neighbors, key=caminho_length)
+        current_caminho = k_best_neighbors[0]
 
         # Atualiza o melhor caminho e melhor distancia
         current_length = caminho_length(current_caminho)
