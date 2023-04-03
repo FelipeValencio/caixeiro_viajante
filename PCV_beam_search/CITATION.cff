@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Valencio, Chavoni
+    given-names: Felipe, Rodrigo
+title: "PCV busca por feixe e algoritmo genético"
+version: 1.0.0
+date-released: 2023-04-03
