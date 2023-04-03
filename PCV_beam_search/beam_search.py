@@ -9,7 +9,7 @@ beam_width = 3
 max_iterations = 100
 
 # Config cidades
-NUM_CITIES = 100
+NUM_CITIES = 1000
 MIN_VAL = 0
 MAX_VAL = 100
 
@@ -60,28 +60,15 @@ def initial_caminho(cities):
 
 # Gera todos os vizinhos possiveis a partir dos k_best_neighbors
 def neighbors_caminhos(k_best_neighbors):
-    neighbors = k_best_neighbors.copy()
-    for caminho in k_best_neighbors:
-        for i in range(len(caminho)):
-            for j in range(i + 1, len(caminho)):
-                neighbor = list(caminho)
-                neighbor[i], neighbor[j] = neighbor[j], neighbor[i]
-                if neighbor not in neighbors:
-                    neighbors.append(neighbor)
-
-    return neighbors
-
-
-def neighbors_caminhosv2(beam):
     neighbors = []
-    for tour, score in beam:
+    for tour in k_best_neighbors:
         for i in range(len(tour)):
             for j in range(i + 1, len(tour)):
                 neighbor = list(tour)
                 neighbor[i], neighbor[j] = neighbor[j], neighbor[i]
                 neighbors.append(neighbor)
     # sort neighbors by score and keep only the top k
-    neighbors = sorted([(neighbor, caminho_length(neighbor)) for neighbor in neighbors], key=lambda x: x[1])[:beam_width]
+    neighbors = select_best_caminhos(neighbors, beam_width)
     return neighbors
 
 
@@ -106,6 +93,7 @@ def local_search_beam(cities):
 
     while iteration < max_iterations:
         start = time.time()
+
         neighbors = neighbors_caminhos(k_best_neighbors)
 
         log("neighbors len: " + str(len(neighbors)))

@@ -7,13 +7,13 @@ import time
 # city_list = [(0, 0), (1, 2), (3, 1), (5, 2), (6, 4), (4, 6), (1, 5), (2, 3), (2, 7), (4, 0), (0, 6)]
 
 # Define the parameters of the genetic algorithm
-POPULATION_SIZE = 1000
-ELITE_SIZE = POPULATION_SIZE * 0.2
+POPULATION_SIZE = 100
+ELITE_SIZE = POPULATION_SIZE * 0.8
 MUTATION_RATE = 0.1
 GENERATIONS = 100
 
 # Config cidades
-NUM_CITIES = 100
+NUM_CITIES = 1000
 MIN_VAL = 0
 MAX_VAL = 100
 
