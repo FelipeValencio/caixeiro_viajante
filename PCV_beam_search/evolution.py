@@ -7,20 +7,31 @@ import time
 # city_list = [(0, 0), (1, 2), (3, 1), (5, 2), (6, 4), (4, 6), (1, 5), (2, 3), (2, 7), (4, 0), (0, 6)]
 
 # Define the parameters of the genetic algorithm
-POPULATION_SIZE = 100
-ELITE_SIZE = POPULATION_SIZE * 0.8
-MUTATION_RATE = 0.1
-GENERATIONS = 100
+POPULATION_SIZE = 50
+ELITE_SIZE = POPULATION_SIZE * 0.2
+MUTATION_RATE = 0.2
+GENERATIONS = 2000
 
 # Config cidades
-NUM_CITIES = 1000
+NUM_CITIES = 100
 MIN_VAL = 0
 MAX_VAL = 100
 
-DEBUG = True
+DEBUG = False
 
-cities = []
+cities = [(79, 65), (37, 90), (17, 66), (81, 98), (28, 74), (30, 37), (47, 35), (56, 23), (100, 37), (3, 47), (51, 91),
+          (63, 23), (84, 70), (42, 24), (1, 84), (95, 96), (82, 9), (78, 16), (48, 2), (86, 60), (20, 1), (96, 86),
+          (90, 35), (20, 49), (13, 3), (89, 71), (72, 14), (13, 94), (89, 98), (38, 81), (1, 93), (39, 40), (9, 88),
+          (71, 53), (66, 45), (100, 58), (15, 27), (69, 82), (85, 70), (27, 50), (99, 64), (11, 94), (41, 67), (47, 20),
+          (84, 87), (98, 69), (23, 60), (93, 61), (93, 89), (98, 27), (94, 9), (48, 89), (85, 35), (100, 14), (64, 91),
+          (74, 5), (37, 95), (13, 28), (24, 81), (11, 2), (89, 84), (41, 89), (28, 69), (21, 3), (77, 64), (96, 57),
+          (12, 85), (92, 54), (0, 34), (98, 17), (42, 25), (28, 39), (77, 78), (23, 30), (63, 6), (2, 42), (98, 75),
+          (39, 80), (50, 54), (20, 27), (31, 88), (8, 87), (73, 10), (37, 28), (87, 71), (59, 22), (94, 69), (39, 44),
+          (72, 96), (67, 86), (50, 19), (90, 93), (68, 80), (68, 76), (52, 47), (83, 73), (91, 0), (96, 31), (56, 52),
+          (20, 48)]
 
+
+# cities = []
 
 def log(s):
     if DEBUG:
@@ -236,11 +247,13 @@ def evolutionary():
     return bestcaminhoOverall, bestLengthOverall
 
 
-# Run the algorithm and print the results
-start = time.time()
-generate_random_tuples()
-end = time.time()
-print("tempo generate_random_tuples:" + str(end - start))
+if not cities:
+    # Run the algorithm and print the results
+    start = time.time()
+    generate_random_tuples()
+    end = time.time()
+    print("tempo generate_random_tuples:" + str(end - start))
+    log("cidades: " + str(cities))
 
 # start = time.time()
 # generate_aresta_matriz()
